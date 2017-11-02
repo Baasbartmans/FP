@@ -35,5 +35,4 @@ main = do
                   
     --teken de plaatjes
     display window background (pictures [
-        drawing,
         translate 30 50 $ player])
