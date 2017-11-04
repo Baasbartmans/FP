@@ -1,8 +1,4 @@
 module Base where
 
-data Size = Size { 
-        width :: Int,
-        height :: Int 
-        }
-
-type Position = (Float, Float)
+type Position = (Float, Float)  -- (x, y)
+type Size = (Int, Int)          -- (Width, Height)

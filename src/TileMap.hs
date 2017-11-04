@@ -2,35 +2,20 @@ module TileMap where
 
 import Base
 import Physics
+import GameObject
+import System.IO
 
-data Tile = Tile {
-    rigidBody :: RigidBody
-}
+type TileMap = [[GameObject]]
 
-getRigidBody :: Tile -> RigidBody
-getRigidBody tile = rigidBody tile
-
-setRigidBody :: Tile -> RigidBody -> Tile
-setRigidBody tile body = Tile body
-
-data TileMap = TileMap {
-    tiles :: [Tile],
-    dimensions :: Size
-}
-
-setTiles :: TileMap -> [Tile] -> TileMap
-setTiles map tiles = TileMap tiles (dimensions map)
-
-getRigidBodies :: [Tile] -> [RigidBody]
+getRigidBodies :: [GameObject] -> [RigidBody]
 getRigidBodies (x:xs) = rigidBody x : getRigidBodies xs
 
-setRigidBodies :: [Tile] -> [RigidBody] -> [Tile]
+setRigidBodies :: [GameObject] -> [RigidBody] -> [GameObject]
 setRigidBodies tiles bodies = let tuples = zip tiles bodies
-                              in [setRigidBody tile body | (tile, body) <- tuples]
+                              in [tile{rigidBody=body} | (tile, body) <- tuples]
 
 update :: TileMap -> Float -> TileMap 
-update map elapsedTime = let oldtiles  = tiles map
-                             oldbodies = getRigidBodies oldtiles
-                             newbodies = updateRigidBodies oldbodies elapsedTime
-                             newtiles  = setRigidBodies oldtiles newbodies 
-                         in  setTiles map newtiles
+update oldtiles elapsedTime = let oldbodies = map (\line -> getRigidBodies line) oldtiles
+                                  newbodies = map (\line -> updateRigidBodies line elapsedTime) oldbodies
+                                  zipped    = zip oldtiles newbodies
+                              in  map (\(tiles, bodies) -> setRigidBodies tiles bodies) zipped

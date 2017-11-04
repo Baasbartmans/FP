@@ -27,11 +27,11 @@ getMinY box = snd $ position box
 -- haakjes weghalen vragen op werkcollege!!!
 getXBounds :: CollisionBox -> Bounds
 getXBounds box = let minx = getMinX box
-                 in (minx, minx + fromIntegral (width (size box)))
+                 in (minx, minx + fromIntegral (fst (size box)))
 
 getYBounds :: CollisionBox -> Bounds
 getYBounds box = let miny = getMinY box
-                 in (miny, miny + fromIntegral (height (size box)))
+                 in (miny, miny + fromIntegral (snd (size box)))
 
 canMove :: CollisionBox -> CollisionBox -> Bool
 canMove b1 b2 = let xBoundb1 = getXBounds b1

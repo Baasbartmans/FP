@@ -1,7 +1,10 @@
 module Scene where
 
-import TiledMap
+import TileMap
 
 data Scene = Scene { 
-    tiledMap :: TiledMap
+    tileMap :: TileMap
 }
+
+instance Drawable Scene where
+    draw scene = draw tiledmap scene
