@@ -37,10 +37,13 @@ getTile char pos = case char of
                         '*' -> basicTile pos
 
 -- GameObjects ---------------------------------------------------------------------
-loadGameObject :: FilePath -> CollisionBox -> Float -> IO GameObject
-loadGameObject path box weight = do sprite  <- loadBMP path
-                                    let body = RigidBody box (0,0) (0,0) weight
-                                    return $ GameObject body sprite
+loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
+loadGameObject path name box weight = do sprite  <- loadBMP path
+                                         let body = RigidBody box (0,0) (0,0) weight
+                                         return $ GameObject name body sprite
 
 basicTile :: Position -> IO GameObject
-basicTile pos = do loadGameObject "Assets/spr_idle.bmp" (CollisionBox pos (32,32)) 0
+basicTile pos = do loadGameObject "Assets/spr_idle.bmp" 
+                                  "basicTile" 
+                                  (CollisionBox pos (32,32)) 
+                                  0

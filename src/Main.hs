@@ -13,8 +13,8 @@ import Physics
 
 main :: IO ()
 main = do gamestates <- loadGameStates
-          let initialState = head (tail gamestates)
-          playIO (InWindow "Counter" (400, 400) (0, 0)) -- Or FullScreen
+          let initialState = head gamestates
+          playIO FullScreen -- Or FullScreen
               black            -- Background color
               10               -- Frames per second
               initialState     -- Initial state
@@ -46,9 +46,9 @@ loadMainMenuScene = do t1 <- backG
                        t3 <- playB
                        return $ Scene [t1, t2, t3] [] [[]]
                        where
-                        backG = loadGameObject "Assets/spr_title.bmp" (CollisionBox (0,0) (10,10)) 0
-                        backB = loadGameObject "Assets/spr_button_back.bmp" (CollisionBox (0,( (-230) )) (100,10)) 0
-                        playB = loadGameObject "Assets/spr_button_play.bmp" (CollisionBox (0,( (-160) )) (10,10)) 0
+                        backG = loadGameObject "Assets/spr_title.bmp" "backg" (CollisionBox (0,0) (10,10)) 0
+                        backB = loadGameObject "Assets/spr_button_back.bmp" "backb" (CollisionBox (0,( (-230) )) (100,10)) 0
+                        playB = loadGameObject "Assets/spr_button_play.bmp" "playB" (CollisionBox (0,( (-160) )) (10,10)) 0
 
 
 loadSelectLevel :: IO GameState
@@ -72,18 +72,17 @@ loadSelectLevelScene = do t1 <- backG
                           t14 <- backB
                           return $ Scene [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14] [] [[]]
                           where
-                            backG = loadGameObject "Assets/spr_levelselect.bmp" (CollisionBox (0,0) (10,10)) 0
-                            l1 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (-264) ,170) (10,10)) 0
-                            l2 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (-100) ,170) (10,10)) 0
-                            l3 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (60) ,170) (10,10)) 0
-                            l4 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( 230 ,170) (10,10)) 0
-                            l5 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (-264) ,20) (10,10)) 0
-                            l6 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (-100) ,20) (10,10)) 0
-                            l7 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (60) ,20) (10,10)) 0
-                            l8 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( 230 ,20) (10,10)) 0
-                            l9 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (-264) , (-130) ) (10,10)) 0
-                            l10 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (-100) ,(-130)) (10,10)) 0
-                            l11 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( (60) ,(-130)) (10,10)) 0
-                            l12 = loadGameObject "Assets/spr_level_unsolved.bmp" (CollisionBox ( 230 ,(-130)) (10,10)) 0
-                            backB = loadGameObject "Assets/spr_button_back.bmp" (CollisionBox (0, (-280) ) (10,10)) 0
-
+                            backG = loadGameObject "Assets/spr_levelselect.bmp" "backG" (CollisionBox (0,0) (10,10)) 0
+                            l1 = loadGameObject "Assets/spr_level_unsolved.bmp" "level1" (CollisionBox ( (-264) ,170) (10,10)) 0
+                            l2 = loadGameObject "Assets/spr_level_unsolved.bmp" "level2" (CollisionBox ( (-100) ,170) (10,10)) 0
+                            l3 = loadGameObject "Assets/spr_level_unsolved.bmp" "level3" (CollisionBox ( (60) ,170) (10,10)) 0
+                            l4 = loadGameObject "Assets/spr_level_unsolved.bmp" "level4" (CollisionBox ( 230 ,170) (10,10)) 0
+                            l5 = loadGameObject "Assets/spr_level_unsolved.bmp" "level5" (CollisionBox ( (-264) ,20) (10,10)) 0
+                            l6 = loadGameObject "Assets/spr_level_unsolved.bmp" "level6" (CollisionBox ( (-100) ,20) (10,10)) 0
+                            l7 = loadGameObject "Assets/spr_level_unsolved.bmp" "level7" (CollisionBox ( (60) ,20) (10,10)) 0
+                            l8 = loadGameObject "Assets/spr_level_unsolved.bmp" "level8" (CollisionBox ( 230 ,20) (10,10)) 0
+                            l9 = loadGameObject "Assets/spr_level_unsolved.bmp" "level9" (CollisionBox ( (-264) , (-130) ) (10,10)) 0
+                            l10 = loadGameObject "Assets/spr_level_unsolved.bmp" "level10" (CollisionBox ( (-100) ,(-130)) (10,10)) 0
+                            l11 = loadGameObject "Assets/spr_level_unsolved.bmp" "level11" (CollisionBox ( (60) ,(-130)) (10,10)) 0
+                            l12 = loadGameObject "Assets/spr_level_unsolved.bmp" "level12" (CollisionBox ( 230 ,(-130)) (10,10)) 0
+                            backB = loadGameObject "Assets/spr_button_back.bmp" "backB"(CollisionBox (0, (-280) ) (10,10)) 0
