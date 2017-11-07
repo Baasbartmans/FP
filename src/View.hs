@@ -29,14 +29,3 @@ getBox RigidBody{collisionBox = c} = c
 
 getPos :: CollisionBox -> Position
 getPos CollisionBox{position = p} = p
-
-
-            
-{-
-drawPictures objects =   
-    let positions  = [position (collisionBox (rigidBody obj)) | obj <- objects]
-                           sprites    = [sprite obj | obj <- objects]
-                           zipped     = zip positions sprites
-                           translated = [Translate x y picture | ((x,y), picture) <- zipped]
-                       in  Pictures translated
-                       -}
