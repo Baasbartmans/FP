@@ -9,6 +9,7 @@ import Graphics.Gloss.Interface.IO.Game
 import Scene 
 import System.Random
 import ObjectFactory
+import Physics
 
 main :: IO ()
 main = do gamestates <- loadGameStates
@@ -40,8 +41,17 @@ loadMainMenu = do scene <- loadMainMenuScene
                   return (GameState MainMenu scene [] 0)
 
 loadMainMenuScene :: IO Scene
-loadMainMenuScene = do tile <- basicTile (0,0)
-                       return $ Scene [tile] [] [[]]
+loadMainMenuScene = do t1 <- backG
+                       t2 <- backB
+                       t3 <- playB
+
+                       return $ Scene [t1, t2, t3] [] [[]]
+
+                       where
+                        backG = loadGameObject "Assets/spr_title.bmp" (CollisionBox (0,0) (10,10)) 0
+                        backB = loadGameObject "Assets/spr_button_back.bmp" (CollisionBox (25,120) (100,10)) 0
+                        playB = loadGameObject "Assets/spr_button_play.bmp" (CollisionBox (25,160) (10,10)) 0
+
 
 loadSelectLevel :: IO GameState
 loadSelectLevel = do scene <- loadSelectLevelScene
