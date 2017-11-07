@@ -49,7 +49,7 @@ loadMainMenuScene = do t1 <- backG
 
                        where
                         backG = loadGameObject "Assets/spr_title.bmp" (CollisionBox (0,0) (10,10)) 0
-                        backB = loadGameObject "Assets/spr_button_back.bmp" (CollisionBox (25,120) (100,10)) 0
+                        backB = loadGameObject "Assets/spr_button_back.bmp" (CollisionBox (250,120) (100,10)) 0
                         playB = loadGameObject "Assets/spr_button_play.bmp" (CollisionBox (25,160) (10,10)) 0
 
 

@@ -8,6 +8,7 @@ import Graphics.Gloss.Data.Picture
 import GameObject
 import Physics
 import Scene
+import Base
 
 view :: GameState -> IO Picture
 view = return . viewPure
@@ -19,21 +20,16 @@ drawPictures :: [GameObject] -> Picture
 drawPictures objects = Pictures (map (translator) objects)
 
 translator :: GameObject -> Picture
-translator GameObject{rigidBody = r, sprite = s} = translate (x) (y) $ s
-
+translator GameObject{rigidBody = r, sprite = s} = translate (fst pos) (snd pos) $ s
+    where pos = getPos $ getBox r
 
 --extract
-getBox :: Rigidbody -> CollisionBox
+getBox :: RigidBody -> CollisionBox
 getBox RigidBody{collisionBox = c} = c
 
 getPos :: CollisionBox -> Position
 getPos CollisionBox{position = p} = p
 
-rigidX :: Position -> Float
-rigidX RigidBody{x = a} = a
-
-rigidY :: Position -> Float
-rigidY RigidBody{y = a} = a
 
             
 {-
