@@ -1,10 +1,10 @@
 module Scene where
 
 import TileMap
+import GameObject
 
-data Scene = Scene { 
-    tileMap :: TileMap
+data Scene = Scene {
+    hud      :: [GameObject],
+    entities :: [GameObject],
+    tileMap  :: TileMap
 }
-
-instance Drawable Scene where
-    draw scene = draw tiledmap scene

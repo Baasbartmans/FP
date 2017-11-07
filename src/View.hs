@@ -4,12 +4,20 @@ module View where
 
 import Graphics.Gloss
 import Model
+import Graphics.Gloss.Data.Picture
+import GameObject
+import Physics
+import Scene
 
 view :: GameState -> IO Picture
 view = return . viewPure
 
 viewPure :: GameState -> Picture
-viewPure gstate = case infoToShow gstate of
-  ShowNothing   -> blank
-  ShowANumber n -> color green (text (show n))
-  ShowAChar   c -> color green (text [c])
+viewPure gstate = drawPictures (hud (scene gstate))
+
+drawPictures :: [GameObject] -> Picture
+drawPictures objects = let positions  = [position (collisionBox (rigidBody obj)) | obj <- objects]
+                           sprites    = [sprite obj | obj <- objects]
+                           zipped     = zip positions sprites
+                           translated = [Translate x y picture | ((x,y), picture) <- zipped]
+                       in  Pictures translated

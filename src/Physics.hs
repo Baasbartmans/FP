@@ -7,14 +7,14 @@ type Velocity = (Float, Float)
 
 data CollisionBox = CollisionBox {
     position :: Position,
-    size :: Size
+    size     :: Size
 }
 
 data RigidBody = RigidBody {
-    collisionBox :: CollisionBox,
-    velocity :: Velocity,
+    collisionBox  :: CollisionBox,
+    velocity      :: Velocity,
     addedvelocity :: Velocity,    
-    weight :: Float
+    weight        :: Float
 }
 
 -- COLLISION

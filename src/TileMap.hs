@@ -1,9 +1,7 @@
 module TileMap where
 
-import Base
 import Physics
 import GameObject
-import System.IO
 
 type TileMap = [[GameObject]]
 
