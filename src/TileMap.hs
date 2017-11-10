@@ -1,7 +1,6 @@
 module TileMap where
 
 import Physics
-import GameObject
 
 type TileMap = [[GameObject]]
 

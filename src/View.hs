@@ -5,13 +5,12 @@ module View where
 import Graphics.Gloss
 import Model
 import Graphics.Gloss.Data.Picture
-import GameObject
 import Physics
 import Scene
 import Base
 
-view :: GameState -> IO Picture
-view = return . viewPure
+view :: GameStateManager -> IO Picture
+view manager = return $ viewPure (current manager)
 
 viewPure :: GameState -> Picture
 viewPure gstate = drawPictures (hud (scene gstate))

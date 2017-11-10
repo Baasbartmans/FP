@@ -3,15 +3,26 @@
 module Model where
 
 import Scene
+import Data.List
+import Data.Maybe
 
 nO_SECS_BETWEEN_CYCLES :: Float
 nO_SECS_BETWEEN_CYCLES = 5
 
-data GSType = MainMenu | SelectLevel | Play
+data GSType = MainMenu | SelectLevel | Play deriving (Eq)
 
 data GameState = GameState {
                    gsType      :: GSType,
-                   scene       :: Scene,
-                   gameStates  :: [GameState],
-                   elapsedTime :: Float
+                   scene       :: Scene
                  }
+
+data GameStateManager = GameStateManager {
+  current     :: GameState,
+  gameStates  :: [GameState],
+  elapsedTime :: Float  
+}
+
+getGameState :: GameStateManager -> GSType -> GameState
+getGameState manager gstype = case find (\x -> gsType x == gstype) (gameStates manager) of
+                                   Just x  -> x
+                                   Nothing -> error "GameStateType is not knows"

@@ -1,7 +1,8 @@
 module Scene where
 
 import TileMap
-import GameObject
+import Screen
+import Physics
 
 data Scene = Scene {
     hud      :: [GameObject],

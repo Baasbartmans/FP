@@ -1,6 +1,7 @@
 module Physics where
 
 import Base
+import Graphics.Gloss.Data.Picture
 
 type Bounds = (Float, Float)
 type Velocity = (Float, Float)
@@ -17,12 +18,27 @@ data RigidBody = RigidBody {
     weight        :: Float
 }
 
+instance Show CollisionBox where
+    show CollisionBox{position=(x,y),size=(a,b)} = "position: " ++ show(x) ++ "," ++ show(y) ++ " size: " ++ show(a) ++ "," ++ show(b)
+
+data GameObject = GameObject {
+    name      :: String,
+    rigidBody :: RigidBody,
+    sprite    :: Picture
+}
+
+find :: String -> [GameObject] -> GameObject
+find n objects = head [obj | obj <- objects, name obj == n]
+
 -- COLLISION
 getMinX :: CollisionBox -> Float
 getMinX box = fst $ position box
 
 getMinY :: CollisionBox -> Float
 getMinY box = snd $ position box
+
+getCollisionBox :: GameObject -> CollisionBox
+getCollisionBox object = collisionBox (rigidBody object)
 
 -- haakjes weghalen vragen op werkcollege!!!
 getXBounds :: CollisionBox -> Bounds
