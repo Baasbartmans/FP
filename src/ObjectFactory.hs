@@ -33,12 +33,11 @@ loadGameObject path name box weight = let body = RigidBody box (0,0) (0,0) weigh
                                       in  (\x -> GameObject name body x) <$> loadBMP path
 
 basicTile :: Position -> IO GameObject
-<<<<<<< HEAD
 basicTile pos = loadGameObject "Assets/spr_idle.bmp" 
                                "basicTile" 
                                (CollisionBox pos (32,32)) 
                                0
-=======
+
 basicTile pos = do loadGameObject "Assets/spr_idle.bmp" 
                                   "basicTile" 
                                   (CollisionBox pos (32,32)) 
@@ -109,6 +108,3 @@ waterPickup pos = do loadGameObject "Assets/spr_water.bmp"
                                   "waterPickup W" 
                                   (CollisionBox pos (32,32)) 
                                   0     
-
-
->>>>>>> 84b885036f8ffbd0d8f7b6564f5d978b7538af82
