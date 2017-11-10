@@ -38,11 +38,6 @@ basicTile pos = loadGameObject "Assets/spr_idle.bmp"
                                (CollisionBox pos (32,32)) 
                                0
 
-basicTile pos = do loadGameObject "Assets/spr_idle.bmp" 
-                                  "basicTile" 
-                                  (CollisionBox pos (32,32)) 
-                                  0
-
 groundTile :: Position -> IO GameObject
 groundTile pos = do loadGameObject "Assets/spr_wall.bmp" 
                                   "groundTile #" 

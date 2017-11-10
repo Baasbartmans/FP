@@ -82,9 +82,8 @@ applyPhysics body@RigidBody {collisionBox=box,
                                                      in  body {collisionBox=newbox}
 
 handleCollision :: (RigidBody, RigidBody) -> [CollisionBox] -> RigidBody
-handleCollision (old, new) boxes = if   all (\x -> canMove (collisionBox new) x) boxes
-                                   then new -- rigidbody could move, so we keep it this way
-                                   else old -- rigidbody could not move, so we take the old body
+handleCollision (old, new) boxes | all (\x -> canMove (collisionBox new) x) boxes = new -- rigidbody could move, so we keep it this way
+                                 | otherwise                                      = old -- rigidbody could not move, so we take the old body
 
 resetAddedVelocity :: RigidBody -> RigidBody
 resetAddedVelocity body = RigidBody (collisionBox body) (velocity body) (0, 0) (weight body)
