@@ -8,6 +8,7 @@ import Graphics.Gloss.Data.Picture
 import Physics
 import Scene
 import Base
+import Screen
 
 class Drawable a where
     draw :: a -> Picture
@@ -25,5 +26,8 @@ view :: GameStateManager -> IO Picture
 view manager = return $ draw (current manager)
 
 drawPictures :: [GameObject] -> Picture
-drawPictures objects = let zipped     = [(position (getCollisionBox obj), sprite obj) | obj <- objects]
+drawPictures objects = let zipped = toScreen [(getCollisionBox obj, sprite obj) | obj <- objects]
                        in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- zipped]
+
+toScreen :: [(CollisionBox, Picture)] -> [(Position, Picture)]
+toScreen zipped = map (\(CollisionBox (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped

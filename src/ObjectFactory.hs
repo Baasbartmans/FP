@@ -4,6 +4,7 @@ import Base
 import Physics
 import TileMap
 import Scene
+import Screen
 import Graphics.Gloss.Data.Picture
 import Graphics.Gloss.Data.Bitmap
 
@@ -26,15 +27,15 @@ loadTileMap path = readFile path >>= traverseLines 0 . lines
 -- traverse all lines of a file and turn all IO [GameObject] (lines) into one IO [[GameObject]]
 traverseLines :: Int -> [String] -> IO TileMap
 traverseLines _ []     = return [[]]
-traverseLines i (x:xs) = (:) <$> (traverseLine x (i, 0)) <*> (traverseLines (i+1) xs)
+traverseLines i (x:xs) = (:) <$> (traverseLine x (0, i)) <*> (traverseLines (i+1) xs)
 
 -- traverse a line of a file and turn all IO GameObjects into one IO [GameObject]
 traverseLine :: String -> (Int, Int) -> IO [GameObject]
 traverseLine [] _         = return []
-traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral x, fromIntegral y) <*> traverseLine zs (x+1,y)
+traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral (x * tileWidth), fromIntegral (y * tileHeight)) <*> traverseLine zs (x+1,y)
 
 getTile :: Char -> Position -> IO GameObject
-getTile char pos = basicTile pos
+getTile char pos = groundTile pos
 
 -- GameObjects ---------------------------------------------------------------------
 loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
