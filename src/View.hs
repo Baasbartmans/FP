@@ -9,22 +9,21 @@ import Physics
 import Scene
 import Base
 
-view :: GameStateManager -> IO Picture
-view manager = return $ viewPure (current manager)
+class Drawable a where
+    draw :: a -> Picture
 
-viewPure :: GameState -> Picture
-viewPure gstate = drawPictures (hud (scene gstate))
+instance Drawable GameState where
+    draw gstate = draw $ currentScene gstate
+
+instance Drawable Scene where
+    draw scene = let hudPicture      = drawPictures $ hud scene
+                     entitiesPicture = drawPictures $ entities scene
+                     tilemapPicture  = [drawPictures row | row <- tileMap scene]
+                 in  Pictures (hudPicture : entitiesPicture : tilemapPicture)
+
+view :: GameStateManager -> IO Picture
+view manager = return $ draw (current manager)
 
 drawPictures :: [GameObject] -> Picture
-drawPictures objects = Pictures (map (translator) objects)
-
-translator :: GameObject -> Picture
-translator GameObject{rigidBody = r, sprite = s} = translate (fst pos) (snd pos) $ s
-    where pos = getPos $ getBox r
-
---extract
-getBox :: RigidBody -> CollisionBox
-getBox RigidBody{collisionBox = c} = c
-
-getPos :: CollisionBox -> Position
-getPos CollisionBox{position = p} = p
+drawPictures objects = let zipped     = [(position (getCollisionBox obj), sprite obj) | obj <- objects]
+                       in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- zipped]

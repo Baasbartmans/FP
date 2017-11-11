@@ -12,8 +12,9 @@ nO_SECS_BETWEEN_CYCLES = 5
 data GSType = MainMenu | SelectLevel | Play deriving (Eq)
 
 data GameState = GameState {
-                   gsType      :: GSType,
-                   scene       :: Scene
+                   currentScene :: Scene,
+                   scenes       :: [Scene],               
+                   gsType       :: GSType
                  }
 
 data GameStateManager = GameStateManager {
@@ -25,4 +26,4 @@ data GameStateManager = GameStateManager {
 getGameState :: GameStateManager -> GSType -> GameState
 getGameState manager gstype = case find (\x -> gsType x == gstype) (gameStates manager) of
                                    Just x  -> x
-                                   Nothing -> error "GameStateType is not knows"
+                                   Nothing -> error "GameStateType is not known"

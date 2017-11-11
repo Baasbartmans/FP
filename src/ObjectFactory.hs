@@ -3,6 +3,7 @@ module ObjectFactory where
 import Base
 import Physics
 import TileMap
+import Scene
 import Graphics.Gloss.Data.Picture
 import Graphics.Gloss.Data.Bitmap
 
@@ -10,6 +11,13 @@ import Graphics.Gloss.Data.Bitmap
 loadBitMap :: FilePath -> IO Picture
 loadBitMap path = loadBMP path
 
+-- LOAD LEVELS ---------------------------------------------------------------------
+loadLevels :: [FilePath] -> IO[Scene]
+loadLevels []     = return []
+loadLevels (x:xs) = (:) <$> loadLevel x <*> loadLevels xs
+
+loadLevel :: FilePath -> IO Scene
+loadLevel path = (\x -> Scene [] [] x) <$> loadTileMap path
 -- LOAD TILEMAPS -------------------------------------------------------------------
 -- read text from a file and transform it into a TileMap
 loadTileMap :: FilePath -> IO TileMap
@@ -17,15 +25,16 @@ loadTileMap path = readFile path >>= traverseLines 0 . lines
 
 -- traverse all lines of a file and turn all IO [GameObject] (lines) into one IO [[GameObject]]
 traverseLines :: Int -> [String] -> IO TileMap
+traverseLines _ []     = return [[]]
 traverseLines i (x:xs) = (:) <$> (traverseLine x (i, 0)) <*> (traverseLines (i+1) xs)
 
 -- traverse a line of a file and turn all IO GameObjects into one IO [GameObject]
 traverseLine :: String -> (Int, Int) -> IO [GameObject]
+traverseLine [] _         = return []
 traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral x, fromIntegral y) <*> traverseLine zs (x+1,y)
 
 getTile :: Char -> Position -> IO GameObject
-getTile char pos = case char of
-                        '*' -> basicTile pos
+getTile char pos = basicTile pos
 
 -- GameObjects ---------------------------------------------------------------------
 loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
