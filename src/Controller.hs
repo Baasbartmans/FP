@@ -10,8 +10,8 @@ module Controller where
   import System.Random
   import Graphics.Gloss.Data.Point
   import Scene
-  import View
-  
+  import Data.Maybe
+    
   -- | Handle one iteration of the game
   step :: Float -> GameStateManager -> IO GameStateManager
   step secs manager
@@ -29,27 +29,36 @@ module Controller where
   input e manager = return $ inputKey e manager
   
   inputKey :: Event -> GameStateManager -> GameStateManager
-    --MAIN MENU
-  inputKey (EventKey (MouseButton LeftButton) Down _ mousePos) manager@GameStateManager{current=gstate@GameState{gsType=MainMenu}} = 
-    let f1 = manager{current=getGameState manager SelectLevel}
-    in  buttonEvent mousePos "levelSelectBtn" (hud(scene gstate)) f1 manager
-  --LEVELSELECT MENU
-  inputKey (EventKey (MouseButton LeftButton) Down _ mousePos) manager@GameStateManager{current=gstate@GameState{gsType=SelectLevel}} = 
-    let f1 = manager{current=getGameState manager MainMenu}
-    in  buttonEvent mousePos "backBtn" (hud(scene gstate)) f1 manager
-  --REST
-  inputKey _ manager = manager
+  inputKey e m | (gsType $ current m) == MainMenu    = mainMenuInput e m
+               | (gsType $ current m) == SelectLevel = levelSelectInput e m
+               | otherwise                           = m
+
+  mainMenuInput :: Event -> GameStateManager -> GameStateManager
+  mainMenuInput (EventKey (MouseButton LeftButton) Down _ mousePos) m =
+    let f1             = m{current=getGameState m SelectLevel}
+        levelSelectBtn = buttonEvent mousePos "levelSelectBtn" (hud (currentScene (current m))) f1
+    in  getPressedButton [levelSelectBtn] m
+  mainMenuInput _ m = m
+
+  levelSelectInput :: Event -> GameStateManager -> GameStateManager
+  levelSelectInput (EventKey (MouseButton LeftButton) Down _ mousePos) m =
+    let hudlist = hud (currentScene(current m))
+        backBtn = buttonEvent mousePos "backBtn" hudlist m{current=getGameState m MainMenu}
+        playState = getGameState m Play
+        lvl1Btn = buttonEvent mousePos "lvl1Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 0)}}
+        lvl2Btn = buttonEvent mousePos "lvl2Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 1)}}        
+    in  getPressedButton [lvl1Btn, backBtn] m
+  levelSelectInput _ m = m
 
   {-inputKey (EventKey (Char c) _ _ _) gstate
     = undefined-} -- If the user presses a character key, show that one
   --inputKey _ gstate = gstate -- Otherwise keep the same
 
-
   --BUTTONEVENTS
-  buttonEvent :: Position -> String -> [GameObject] -> a -> a -> a
-  buttonEvent pos name objects f1 f2 
-    | clickedOn pos $ getCollisionBox $ find name objects = f1
-    | otherwise                                           = f2
+  buttonEvent :: Position -> String -> [GameObject] -> a -> Maybe a
+  buttonEvent pos name objects f1
+    | clickedOn pos $ getCollisionBox $ find name objects = Just f1
+    | otherwise                                           = Nothing
 
   clickedOn :: Position -> CollisionBox -> Bool
   clickedOn pos box = let dimensions = size box
@@ -58,46 +67,9 @@ module Controller where
                           p2         = (p + fromIntegral (fst dimensions), q + fromIntegral (snd dimensions))
                       in  pointInBox pos p1 p2
 
-  movement :: Event -> GameObject -> GameObject
-  movement (EventKey (Char 'a') _ _ _) g            = walk g 0   -- walk left
-  movement (EventKey (Char 'd') _ _ _) g            = walk g 1   -- walk right
-  movement (EventKey (SpecialKey KeySpace) _ _ _) g = jump g 1 -- jump
-  movement _   g                                    = g        -- do nothing
-
-  jump :: GameObject -> Int -> GameObject
-  jump g@GameObject{rigidBody = r} i | i < 10 && i > 0 = jump g{rigidBody = rigid' r 2} (i + 1)
-                                     | i > 10          = jump g{rigidBody = rigid' r 3} (i - 1)
-                                     | otherwise       = g
-
-  walk :: GameObject -> Int -> GameObject
-  walk g@GameObject{rigidBody = r} 0 = g{rigidBody = rigid' r 0}
-  walk g@GameObject{rigidBody = r} 1 = g{rigidBody = rigid' r 1}   
-
-                                
-  rigid' :: RigidBody -> Int -> RigidBody
-  rigid' r@RigidBody{collisionBox = c} 0 = r{collisionBox = collisionHP c}
-  rigid' r@RigidBody{collisionBox = c} 1 = r{collisionBox = collisionHM c}
-  rigid' r@RigidBody{collisionBox = c} 2 = r{collisionBox = collisionJU c}
-  rigid' r@RigidBody{collisionBox = c} _ = r{collisionBox = collisionJD c}
-
-
-  --aanpastypes
-
-  collisionHP :: CollisionBox -> CollisionBox --Horizontal Plus
-  collisionHP c@CollisionBox{position = p} = c{position = (pos', snd p)}
-                                      where pos' = 1 + (fst p)
-
-  collisionHM :: CollisionBox -> CollisionBox --Horizontal Min
-  collisionHM c@CollisionBox{position = p} = c{position = (pos', snd p)}
-                                      where pos' = (-1) + (fst p)
-
-  collisionJU :: CollisionBox -> CollisionBox --Jump Up
-  collisionJU c@CollisionBox{position = p} = c{position = (fst p, pos')}
-                                      where pos' = 1 + (snd p)
-
-  collisionJD :: CollisionBox -> CollisionBox --Jump down
-  collisionJD c@CollisionBox{position = p} = c{position = (fst p, pos')}
-                                      where pos' = (-1) + (fst p)
-
-
-                                        
+                      
+  getPressedButton :: [Maybe GameStateManager] -> GameStateManager -> GameStateManager
+  getPressedButton events m = let pressed = filter (\x -> isJust x) events
+                              in  if   length pressed > 0
+                                  then (fromJust . head) pressed
+                                  else m

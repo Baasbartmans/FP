@@ -14,9 +14,9 @@ import Screen
 
 main :: IO ()
 main = do gamestates <- loadGameStates
-          let startGameState   = head gamestates
+          let startGameState   = gamestates !! 0
           let gameStateManager = GameStateManager startGameState gamestates 0
-          playIO window -- Or FullScreen
+          playIO window        -- Or FullScreen
               black            -- Background color
               10               -- Frames per second
               gameStateManager -- Initial state
@@ -29,23 +29,24 @@ window = InWindow "Pong" (width, height) (0, 0)
         
 loadGameStates :: IO [GameState]
 loadGameStates = do mainMenu    <- loadGameState MainMenu loadMainMenuScene
-                    selectLevel <- loadGameState SelectLevel loadSelectLevelScene
-                    return [mainMenu, selectLevel]
+                    selectLevel <- loadGameState SelectLevel loadSelectLevelScene 
+                    playState   <- loadGameState Play (loadLevels ["Levels/" ++ show int ++ ".txt" | int <- [1..12]])
+                    return [mainMenu, selectLevel, playState]
 
-loadGameState :: GSType -> IO Scene -> IO GameState
-loadGameState gstype scene = (\x -> GameState gstype x) <$> scene
+loadGameState :: GSType -> IO [Scene] -> IO GameState
+loadGameState gstype scenes = (\x -> GameState (head x) x gstype) <$> scenes
 
-loadMainMenuScene :: IO Scene
+loadMainMenuScene :: IO [Scene]
 loadMainMenuScene = do t1 <- backG
                        t2 <- backB
                        t3 <- playB
-                       return $ Scene [t1, t2, t3] [] [[]]
+                       return $ [Scene [t1, t2, t3] [] [[]]]
                        where
                         backG = loadGameObject "Assets/spr_title.bmp" "backg" (CollisionBox (0,0) (10,10)) 0
                         backB = loadGameObject "Assets/spr_button_back.bmp" "backb" (CollisionBox (0,( (-230) )) (236,54)) 0
                         playB = loadGameObject "Assets/spr_button_play.bmp" "levelSelectBtn" (CollisionBox (0,-160) (236,54)) 0
 
-loadSelectLevelScene :: IO Scene
+loadSelectLevelScene :: IO [Scene]
 loadSelectLevelScene = do t1 <- backG
                           t2 <- l1
                           t3 <- l2
@@ -60,11 +61,11 @@ loadSelectLevelScene = do t1 <- backG
                           t12 <- l11
                           t13 <- l12
                           t14 <- backB
-                          return $ Scene [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14] [] [[]]
+                          return $ [Scene [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14] [] [[]]]
                           where
                             backG = loadGameObject "Assets/spr_levelselect.bmp" "backG" (CollisionBox (0,0) (10,10)) 0
-                            l1 = loadGameObject "Assets/spr_level_unsolved.bmp" "level1" (CollisionBox ( (-264) ,170) (10,10)) 0
-                            l2 = loadGameObject "Assets/spr_level_unsolved.bmp" "level2" (CollisionBox ( (-100) ,170) (10,10)) 0
+                            l1 = loadGameObject "Assets/spr_level_unsolved.bmp" "lvl1Btn" (CollisionBox ( (-264) ,170) (200,200)) 0
+                            l2 = loadGameObject "Assets/spr_level_unsolved.bmp" "lvl2Btn" (CollisionBox ( (-100) ,170) (10,10)) 0
                             l3 = loadGameObject "Assets/spr_level_unsolved.bmp" "level3" (CollisionBox ( (60) ,170) (10,10)) 0
                             l4 = loadGameObject "Assets/spr_level_unsolved.bmp" "level4" (CollisionBox ( 230 ,170) (10,10)) 0
                             l5 = loadGameObject "Assets/spr_level_unsolved.bmp" "level5" (CollisionBox ( (-264) ,20) (10,10)) 0

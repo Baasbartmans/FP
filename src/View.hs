@@ -8,23 +8,26 @@ import Graphics.Gloss.Data.Picture
 import Physics
 import Scene
 import Base
+import Screen
+
+class Drawable a where
+    draw :: a -> Picture
+
+instance Drawable GameState where
+    draw gstate = draw $ currentScene gstate
+
+instance Drawable Scene where
+    draw scene = let hudPicture      = drawPictures $ hud scene
+                     entitiesPicture = drawPictures $ entities scene
+                     tilemapPicture  = [drawPictures row | row <- tileMap scene]
+                 in  Pictures (hudPicture : entitiesPicture : tilemapPicture)
 
 view :: GameStateManager -> IO Picture
-view manager = return $ viewPure (current manager)
-
-viewPure :: GameState -> Picture
-viewPure gstate = drawPictures (hud (scene gstate))
+view manager = return $ draw (current manager)
 
 drawPictures :: [GameObject] -> Picture
-drawPictures objects = Pictures (map (translator) objects)
+drawPictures objects = let zipped = toScreen [(getCollisionBox obj, sprite obj) | obj <- objects]
+                       in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- zipped]
 
-translator :: GameObject -> Picture
-translator GameObject{rigidBody = r, sprite = s} = translate (fst pos) (snd pos) $ s
-    where pos = getPos $ getBox r
-
---extract
-getBox :: RigidBody -> CollisionBox
-getBox RigidBody{collisionBox = c} = c
-
-getPos :: CollisionBox -> Position
-getPos CollisionBox{position = p} = p
+toScreen :: [(CollisionBox, Picture)] -> [(Position, Picture)]
+toScreen zipped = map (\(CollisionBox (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped
