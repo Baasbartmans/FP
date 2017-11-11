@@ -26,6 +26,17 @@ traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral x, fromIntegral y) <
 getTile :: Char -> Position -> IO GameObject
 getTile char pos = case char of
                         '*' -> basicTile pos
+                        '#' -> groundTile pos
+                        '@' -> iceTile pos
+                        '+' -> hotTile pos
+                        '1' -> startTile pos
+                        'X' -> endTile pos
+                        'F' -> fameEnemy pos
+                        'T' -> turtleEnemy pos
+                        'L' -> rocketEnemyL pos
+                        'R' -> rocketEnemyR pos
+                        'S' -> sparkyEnemy pos
+                        'W' -> waterPickup pos              
 
 -- GameObjects ---------------------------------------------------------------------
 loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
@@ -94,7 +105,7 @@ rocketEnemyR pos = do loadGameObject "Assets/spr_rocket@3.bmp"
 
 sparkyEnemy :: Position -> IO GameObject
 sparkyEnemy pos = do loadGameObject "Assets/spr_electrocute@6x5.bmp" 
-                                  "sparkEnemy S" 
+                                  "sparkyEnemy S" 
                                   (CollisionBox pos (32,32)) 
                                   0
 
