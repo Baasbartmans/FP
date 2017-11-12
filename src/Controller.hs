@@ -11,18 +11,33 @@ module Controller where
   import Graphics.Gloss.Data.Point
   import Scene
   import Data.Maybe
+  import Data.List
     
+  class Updatable a where
+    update :: Float -> a -> GameStateManager -> IO a
+
+  instance Updatable GameState where
+    update secs s m = (\x -> s{currentScene = x}) <$> update secs (currentScene s) m
+  
+  instance Updatable Scene where
+    update secs s m = (\x -> s{entities = x}) <$> updateObjectList secs (entities s) m -- ONLY UPDATING ENTITIES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  updateObjectList :: Float -> [GameObject] -> GameStateManager -> IO [GameObject]
+  updateObjectList _ [] _          = return []
+  updateObjectList secs l@(x:xs) m = let -- updateRIGIDbodies
+    (:) <$> update secs x m <*> updateObjectList secs xs m
+
+  instance Updatable GameObject where
+    update secs obj m = return obj
+
   -- | Handle one iteration of the game
   step :: Float -> GameStateManager -> IO GameStateManager
   step secs manager
      | elapsedTime manager + secs > nO_SECS_BETWEEN_CYCLES
-     = do updatedGameState <- update nO_SECS_BETWEEN_CYCLES (current manager)
+     = do updatedGameState <- update nO_SECS_BETWEEN_CYCLES (current manager) manager
           return manager{current=updatedGameState, elapsedTime=0}
      | otherwise
      = return manager{elapsedTime = elapsedTime manager + secs}
-  
-  update :: Float -> GameState -> IO GameState
-  update elapsedTime gstate = return gstate
 
   -- | Handle user input
   input :: Event -> GameStateManager -> IO GameStateManager
@@ -31,6 +46,7 @@ module Controller where
   inputKey :: Event -> GameStateManager -> GameStateManager
   inputKey e m | (gsType $ current m) == MainMenu    = mainMenuInput e m
                | (gsType $ current m) == SelectLevel = levelSelectInput e m
+               | (gsType $ current m) == Play        = playInput e m
                | otherwise                           = m
 
   mainMenuInput :: Event -> GameStateManager -> GameStateManager
@@ -46,19 +62,34 @@ module Controller where
         backBtn = buttonEvent mousePos "backBtn" hudlist m{current=getGameState m MainMenu}
         playState = getGameState m Play
         lvl1Btn = buttonEvent mousePos "lvl1Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 0)}}
-        lvl2Btn = buttonEvent mousePos "lvl2Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 1)}}        
-    in  getPressedButton [lvl1Btn, backBtn] m
+        --lvl2Btn = buttonEvent mousePos "lvl2Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 1)}}        
+    in  getPressedButton [backBtn, lvl1Btn] m
   levelSelectInput _ m = m
 
-  {-inputKey (EventKey (Char c) _ _ _) gstate
-    = undefined-} -- If the user presses a character key, show that one
-  --inputKey _ gstate = gstate -- Otherwise keep the same
+  playInput :: Event -> GameStateManager -> GameStateManager
+  playInput (EventKey (Char c) _ _ _) m = case c of 
+                                            'a'       -> movePlayer (-100,0) m
+                                            'd'       -> movePlayer (100, 0) m
+                                            otherwise -> m
+  playInput _ m                         = m
 
+  -- NOT WORKING
+  movePlayer :: (Float, Float) -> GameStateManager -> GameStateManager
+  movePlayer vel m = let gamestate  = current m
+                         scene      = currentScene gamestate
+                         objects    = entities scene
+                         player     = fromJust $ find (\x -> name x == "Player") objects
+                         rest       = delete player objects
+                         playerbody = body player
+                         playerrb   = rigidBody playerbody
+                         newPlayer  = player{body=playerbody{rigidBody=playerrb{addedvelocity=vel}}}
+                         newObjects = newPlayer : objects
+                     in  m{current=gamestate{currentScene=scene{entities=newObjects}}}
   --BUTTONEVENTS
   buttonEvent :: Position -> String -> [GameObject] -> a -> Maybe a
-  buttonEvent pos name objects f1
-    | clickedOn pos $ getCollisionBox $ find name objects = Just f1
-    | otherwise                                           = Nothing
+  buttonEvent pos n objects f1
+    | clickedOn pos $ getCollisionBox $ fromJust $ find (\x -> n == name x) objects = Just f1
+    | otherwise                                                                     = Nothing
 
   clickedOn :: Position -> CollisionBox -> Bool
   clickedOn pos box = let dimensions = size box

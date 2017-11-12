@@ -9,18 +9,17 @@ import Data.Maybe
 nO_SECS_BETWEEN_CYCLES :: Float
 nO_SECS_BETWEEN_CYCLES = 5
 
-data GSType = MainMenu | SelectLevel | Play deriving (Eq)
-
-data GameState = GameState {
-                   currentScene :: Scene,
-                   scenes       :: [Scene],               
-                   gsType       :: GSType
-                 }
-
 data GameStateManager = GameStateManager {
   current     :: GameState,
   gameStates  :: [GameState],
   elapsedTime :: Float  
+}
+
+data GSType = MainMenu | SelectLevel | Play deriving (Eq)
+data GameState = GameState {
+  currentScene :: Scene,
+  scenes       :: [Scene],               
+  gsType       :: GSType
 }
 
 getGameState :: GameStateManager -> GSType -> GameState

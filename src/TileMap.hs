@@ -5,11 +5,11 @@ import Physics
 type TileMap = [[GameObject]]
 
 getRigidBodies :: [GameObject] -> [RigidBody]
-getRigidBodies (x:xs) = rigidBody x : getRigidBodies xs
+getRigidBodies (x:xs) = getRigidBody x : getRigidBodies xs
 
 setRigidBodies :: [GameObject] -> [RigidBody] -> [GameObject]
 setRigidBodies tiles bodies = let tuples = zip tiles bodies
-                              in [tile{rigidBody=body} | (tile, body) <- tuples]
+                              in [setRigidBody tile body | (tile, body) <- tuples]
 
 update :: TileMap -> Float -> TileMap 
 update oldtiles elapsedTime = let oldbodies = map (\line -> getRigidBodies line) oldtiles

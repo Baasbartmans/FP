@@ -5,6 +5,7 @@ import Physics
 import TileMap
 import Scene
 import Screen
+import Physics
 import Graphics.Gloss.Data.Picture
 import Graphics.Gloss.Data.Bitmap
 
@@ -35,34 +36,27 @@ traverseLine [] _         = return []
 traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral (x * tileWidth), fromIntegral (y * tileHeight)) <*> traverseLine zs (x+1,y)
 
 getTile :: Char -> Position -> IO GameObject
-<<<<<<< HEAD
 getTile char pos = case char of
-                        '*' -> basicTile pos
+                        '.' -> basicTile pos
                         '#' -> groundTile pos
                         '@' -> iceTile pos
                         '+' -> hotTile pos
                         '1' -> startTile pos
                         'X' -> endTile pos
-                        'F' -> fameEnemy pos
+                        'F' -> flameEnemy pos
                         'T' -> turtleEnemy pos
                         'L' -> rocketEnemyL pos
                         'R' -> rocketEnemyR pos
                         'S' -> sparkyEnemy pos
                         'W' -> waterPickup pos              
-=======
-getTile char pos = groundTile pos
->>>>>>> 696a8cbb985c2ef56f5c488bfb2d15a91a2a7357
 
 -- GameObjects ---------------------------------------------------------------------
 loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
-loadGameObject path name box weight = let body = RigidBody box (0,0) (0,0) weight
-                                      in  (\x -> GameObject name body x) <$> loadBMP path
+loadGameObject path name box weight = let rigidbody = RigidBody box (0,0) (0,0) weight
+                                      in  (\x -> GameObject name (Body rigidbody x)) <$> loadBMP path
 
 basicTile :: Position -> IO GameObject
-basicTile pos = loadGameObject "Assets/spr_idle.bmp" 
-                               "basicTile" 
-                               (CollisionBox pos (32,32)) 
-                               0
+basicTile pos = return $ GameObject "empty" Empty
 
 groundTile :: Position -> IO GameObject
 groundTile pos = do loadGameObject "Assets/spr_wall.bmp" 

@@ -14,7 +14,7 @@ import Screen
 
 main :: IO ()
 main = do gamestates <- loadGameStates
-          let startGameState   = gamestates !! 0
+          let startGameState   = gamestates !! 2
           let gameStateManager = GameStateManager startGameState gamestates 0
           playIO window        -- Or FullScreen
               black            -- Background color
@@ -30,7 +30,7 @@ window = InWindow "Pong" (width, height) (0, 0)
 loadGameStates :: IO [GameState]
 loadGameStates = do mainMenu    <- loadGameState MainMenu loadMainMenuScene
                     selectLevel <- loadGameState SelectLevel loadSelectLevelScene 
-                    playState   <- loadGameState Play (loadLevels ["Levels/" ++ show int ++ ".txt" | int <- [1..12]])
+                    playState   <- loadGameState Play (loadLevels ["Levels/" ++ show int ++ ".txt" | int <- [1..1]])
                     return [mainMenu, selectLevel, playState]
 
 loadGameState :: GSType -> IO [Scene] -> IO GameState

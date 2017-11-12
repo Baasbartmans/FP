@@ -26,8 +26,11 @@ view :: GameStateManager -> IO Picture
 view manager = return $ draw (current manager)
 
 drawPictures :: [GameObject] -> Picture
-drawPictures objects = let zipped = toScreen [(getCollisionBox obj, sprite obj) | obj <- objects]
-                       in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- zipped]
+drawPictures objects = let bodies         = map (\x -> body x) objects
+                           noEmpties      = filter (\x -> (not . isEmptyBody) x) bodies
+                           tuples         = map (\x -> (collisionBox $ rigidBody x, sprite x)) noEmpties
+                           inScreenCoords = toScreen tuples
+                       in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- inScreenCoords]
 
 toScreen :: [(CollisionBox, Picture)] -> [(Position, Picture)]
 toScreen zipped = map (\(CollisionBox (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped

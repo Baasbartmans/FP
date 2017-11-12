@@ -22,13 +22,22 @@ instance Show CollisionBox where
     show CollisionBox{position=(x,y),size=(a,b)} = "position: " ++ show(x) ++ "," ++ show(y) ++ " size: " ++ show(a) ++ "," ++ show(b)
 
 data GameObject = GameObject {
-    name      :: String,
+    name :: String,
+    body :: Body
+}
+
+instance Eq GameObject where
+    obj1 == obj2 = name obj1 == name obj2
+    obj1 /= obj2 = name obj1 /= name obj2
+
+data Body = Empty | Body {
     rigidBody :: RigidBody,
     sprite    :: Picture
 }
 
-find :: String -> [GameObject] -> GameObject
-find n objects = head [obj | obj <- objects, name obj == n]
+isEmptyBody :: Body -> Bool
+isEmptyBody Empty = True
+isEmptyBody _     = False
 
 -- COLLISION
 getMinX :: CollisionBox -> Float
@@ -37,8 +46,15 @@ getMinX box = fst $ position box
 getMinY :: CollisionBox -> Float
 getMinY box = snd $ position box
 
+getRigidBody :: GameObject -> RigidBody
+getRigidBody object = rigidBody $ body object
+
+setRigidBody :: GameObject -> RigidBody -> GameObject
+setRigidBody obj rb = let tempbody = body obj 
+                      in  obj{body=tempbody{rigidBody=rb}}
+
 getCollisionBox :: GameObject -> CollisionBox
-getCollisionBox object = collisionBox (rigidBody object)
+getCollisionBox object = collisionBox $ getRigidBody object
 
 -- haakjes weghalen vragen op werkcollege!!!
 getXBounds :: CollisionBox -> Bounds
