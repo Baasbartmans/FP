@@ -22,7 +22,7 @@ module Controller where
   instance Updatable Scene where
     update secs s m = do updatedObjects <- updateObjectList secs (entities s) m                                                            --update objects
                          let tilemapbodies      = [getRigidBody obj | obj <- (concat (tileMap s)), not (isEmptyBody (body obj))]                         
-                         let updatedRigidBodies = updateRigidBodies [rigidBody $ body obj | obj <- updatedObjects] tilemapbodies secs                 --update rigidBodies
+                         let updatedRigidBodies = updateRigidBodies [rigidBody $ body obj | obj <- updatedObjects] tilemapbodies secs      --update rigidBodies
                          let finalObjects       = map (\(o, rb) -> o{body=(body o){rigidBody=rb}}) (zip updatedObjects updatedRigidBodies) --produce final objects
                          return s{entities=finalObjects}                                                                                   --create scene with same properties, but with updated entities 
   
@@ -31,7 +31,9 @@ module Controller where
   updateObjectList secs l@(x:xs) m = (:) <$> update secs x m <*> updateObjectList secs xs m
 
   instance Updatable GameObject where
-    update secs obj m = return obj -- check for name to add special update functions
+    --update _ obj@GameObject{name="Pickup"} m = --let pickupBox = getCollisionBox obj
+                                               --let playerBox = 
+    update _ obj _ = return obj
 
   -- | Handle one iteration of the game
   step :: Float -> GameStateManager -> IO GameStateManager

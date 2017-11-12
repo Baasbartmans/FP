@@ -9,6 +9,8 @@ import Physics
 import Scene
 import Base
 import Screen
+import Data.List
+import Data.Maybe
 
 class Drawable a where
     draw :: a -> Picture
@@ -18,8 +20,10 @@ instance Drawable GameState where
 
 instance Drawable Scene where
     draw scene = let hudPicture      = drawPictures $ hud scene
-                     (x,y)           = getPosition $ head [obj | obj <- entities scene, name obj == "Player"]
-                     playerOffset    = (x, y)
+                     maybePlayer     = find (\x -> "Player" == name x) (entities scene)
+                     playerOffset    = if   isJust maybePlayer
+                                       then getPosition (fromJust maybePlayer)
+                                       else (0,0)
                      entitiesPicture = drawPicturesWithOffset (entities scene) playerOffset
                      tilemapPicture  = [drawPicturesWithOffset row playerOffset | row <- tileMap scene]
                  in  Pictures (hudPicture : entitiesPicture : tilemapPicture)
