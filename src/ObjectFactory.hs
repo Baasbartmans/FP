@@ -71,7 +71,7 @@ basicTile = return $ GameObject "empty" Empty
 groundTile :: Position -> IO GameObject
 groundTile pos = do loadGameObject "Assets/spr_wall.bmp" 
                                    "groundTile #" 
-                                   (CollisionBox pos (72,55)) 
+                                   (CollisionBox (fst pos, snd pos) (64,64)) 
 
 iceTile :: Position -> IO GameObject
 iceTile pos = do loadGameObject "Assets/spr_ice.bmp" 
@@ -86,7 +86,7 @@ hotTile pos = do loadGameObject "Assets/spr_hot.bmp"
 startTile :: Position -> IO GameObject
 startTile pos = do loadGameObject "Assets/spr_idle.bmp" --geen sprite?
                                   "Player" 
-                                  (CollisionBox pos (112,94)) 
+                                  (CollisionBox (fst pos - 6 , snd pos - 6) (12,12)) 
 
 endTile :: Position -> IO GameObject
 endTile pos = do loadGameObject "Assets/spr_goal.bmp" 

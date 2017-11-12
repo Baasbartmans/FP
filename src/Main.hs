@@ -30,7 +30,7 @@ window = InWindow "Pong" (width, height) (0, 0)
 loadGameStates :: IO [GameState]
 loadGameStates = do mainMenu    <- loadGameState MainMenu loadMainMenuScene
                     selectLevel <- loadGameState SelectLevel loadSelectLevelScene 
-                    playState   <- loadGameState Play (loadLevels ["Levels/" ++ show int ++ ".txt" | int <- [1..1]])
+                    playState   <- loadGameState Play (loadLevels ["Levels/" ++ show int ++ ".txt" | int <- [2..2]])
                     return [mainMenu, selectLevel, playState]
 
 loadGameState :: GSType -> IO [Scene] -> IO GameState
