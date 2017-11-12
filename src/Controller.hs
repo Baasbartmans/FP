@@ -120,7 +120,7 @@ module Controller where
   replaceEntity _ []     = []
   replaceEntity n (x:xs) | n == (name x) = xs
                          | otherwise     = replaceEntity n xs
-
+  
   --AI
   data Direction = None | L | R | U | D deriving (Eq)
 
@@ -168,11 +168,11 @@ module Controller where
     | otherwise                                                                     = Nothing
 
   clickedOn :: Position -> CollisionBox -> Bool
-  clickedOn pos box = let dimensions = size box
-                          (x,y)      = position box
-                          p1@(p,q)   = (x - fromIntegral (fst dimensions) * 0.5, y - fromIntegral (snd dimensions) * 0.5)
-                          p2         = (p + fromIntegral (fst dimensions), q + fromIntegral (snd dimensions))
-                      in  pointInBox pos p1 p2
+  clickedOn (xpos, ypos) box = let dimensions = size box
+                                   (x,y)      = position box
+                                   p1@(p,q)   = (x - fromIntegral (fst dimensions) * 0.5, y - fromIntegral (snd dimensions) * 0.5)
+                                   p2         = (p + fromIntegral (fst dimensions), q + fromIntegral (snd dimensions))
+                               in  pointInBox (xpos + (fromIntegral halfWidth), ypos + (fromIntegral halfHeight)) p1 p2
                       
   getPressedButton :: [Maybe GameStateManager] -> GameStateManager -> GameStateManager
   getPressedButton events m = let pressed = filter (\x -> isJust x) events

@@ -49,4 +49,4 @@ toScreen :: [(CollisionBox, Picture)] -> [(Position, Picture)]
 toScreen zipped = map (\(CollisionBox b (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped
 
 toScreenWithOffset :: [(CollisionBox, Picture)] -> Position -> [(Position, Picture)]
-toScreenWithOffset zipped (px, py) = map (\(CollisionBox b (x,y) (w,h), s) -> ((x - px , (-y) + py), s)) zipped
+toScreenWithOffset zipped (px, py) = map (\(CollisionBox b (x,y) (w,h), s) -> ((x - px + fromIntegral(div w 2), (-y) + py + fromIntegral(div h 2)), s)) zipped
