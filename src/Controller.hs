@@ -20,12 +20,14 @@ module Controller where
     update secs s m = (\x -> s{currentScene = x}) <$> update secs (currentScene s) m
   
   instance Updatable Scene where
-    update secs s m = (\x -> s{entities = x}) <$> updateObjectList secs (entities s) m -- ONLY UPDATING ENTITIES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    update secs s m = do updatedObjects <- updateObjectList secs (entities s) m                --update objects
+                         let updatedRigidBodies = updateRigidBodies [rigidBody $ body obj | obj <- updatedObjects] secs                  --update rigidBodies
+                         let finalObjects       = map (\(o, rb) -> o{body=(body o){rigidBody=rb}}) (zip updatedObjects updatedRigidBodies) --produce final objects
+                         return s{entities=finalObjects}                                                                                 --create scene with same properties, but with updated entities 
   
   updateObjectList :: Float -> [GameObject] -> GameStateManager -> IO [GameObject]
   updateObjectList _ [] _          = return []
-  updateObjectList secs l@(x:xs) m = let -- updateRIGIDbodies
-    (:) <$> update secs x m <*> updateObjectList secs xs m
+  updateObjectList secs l@(x:xs) m = (:) <$> update secs x m <*> updateObjectList secs xs m
 
   instance Updatable GameObject where
     update secs obj m = return obj

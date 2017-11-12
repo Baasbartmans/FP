@@ -49,10 +49,6 @@ getTile char pos = case char of
                         'R' -> rocketEnemyR pos
                         'S' -> sparkyEnemy pos
                         'W' -> waterPickup pos              
-<<<<<<< HEAD
-=======
---getTile char pos = groundTile pos
->>>>>>> dd747eaf746efa070847a3dc1f99c73ef5adaed9
 
 -- GameObjects ---------------------------------------------------------------------
 loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
