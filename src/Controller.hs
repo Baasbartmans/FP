@@ -20,17 +20,18 @@ module Controller where
     update secs s m = (\x -> s{currentScene = x}) <$> update secs (currentScene s) m
   
   instance Updatable Scene where
-    update secs s m = do updatedObjects <- updateObjectList secs (entities s) m                --update objects
-                         let updatedRigidBodies = updateRigidBodies [rigidBody $ body obj | obj <- updatedObjects] secs                  --update rigidBodies
+    update secs s m = do updatedObjects <- updateObjectList secs (entities s) m                                                            --update objects
+                         let tilemapbodies      = [getRigidBody obj | obj <- (concat (tileMap s)), not (isEmptyBody (body obj))]                         
+                         let updatedRigidBodies = updateRigidBodies [rigidBody $ body obj | obj <- updatedObjects] tilemapbodies secs                 --update rigidBodies
                          let finalObjects       = map (\(o, rb) -> o{body=(body o){rigidBody=rb}}) (zip updatedObjects updatedRigidBodies) --produce final objects
-                         return s{entities=finalObjects}                                                                                 --create scene with same properties, but with updated entities 
+                         return s{entities=finalObjects}                                                                                   --create scene with same properties, but with updated entities 
   
   updateObjectList :: Float -> [GameObject] -> GameStateManager -> IO [GameObject]
   updateObjectList _ [] _          = return []
   updateObjectList secs l@(x:xs) m = (:) <$> update secs x m <*> updateObjectList secs xs m
 
   instance Updatable GameObject where
-    update secs obj m = return obj
+    update secs obj m = return obj -- check for name to add special update functions
 
   -- | Handle one iteration of the game
   step :: Float -> GameStateManager -> IO GameStateManager
@@ -70,23 +71,29 @@ module Controller where
 
   playInput :: Event -> GameStateManager -> GameStateManager
   playInput (EventKey (Char c) _ _ _) m = case c of 
-                                            'a'       -> movePlayer (-100,0) m
-                                            'd'       -> movePlayer (100, 0) m
+                                            'w'       -> movePlayer (0  ,-15) m
+                                            'a'       -> movePlayer (-15,  0) m
+                                            's'       -> movePlayer (0  , 15) m
+                                            'd'       -> movePlayer (15 ,  0) m
                                             otherwise -> m
   playInput _ m                         = m
 
-  -- NOT WORKING
   movePlayer :: (Float, Float) -> GameStateManager -> GameStateManager
-  movePlayer vel m = let gamestate  = current m
-                         scene      = currentScene gamestate
-                         objects    = entities scene
-                         player     = fromJust $ find (\x -> name x == "Player") objects
-                         rest       = delete player objects
-                         playerbody = body player
-                         playerrb   = rigidBody playerbody
-                         newPlayer  = player{body=playerbody{rigidBody=playerrb{addedvelocity=vel}}}
-                         newObjects = newPlayer : objects
-                     in  m{current=gamestate{currentScene=scene{entities=newObjects}}}
+  movePlayer move m = let gamestate  = current m
+                          scene      = currentScene gamestate
+                          objects    = entities scene
+                          player     = head objects --fromJust $ find (\x -> name x == "Player") objects
+                          rest       = replaceEntity "Player" objects
+                          playerbody = body player
+                          playerrb   = rigidBody playerbody
+                          newPlayer  = player{body=playerbody{rigidBody=playerrb{addedMovement=move}}}
+                          newObjects = newPlayer : rest
+                      in  m{current=gamestate{currentScene=scene{entities=newObjects}}}
+
+  replaceEntity :: String -> [GameObject] -> [GameObject]
+  replaceEntity _ []     = []
+  replaceEntity n (x:xs) | n == (name x) = xs
+                         | otherwise     = replaceEntity n xs
   --BUTTONEVENTS
   buttonEvent :: Position -> String -> [GameObject] -> a -> Maybe a
   buttonEvent pos n objects f1
@@ -99,7 +106,6 @@ module Controller where
                           p1@(p,q)   = (x - fromIntegral (fst dimensions) * 0.5, y - fromIntegral (snd dimensions) * 0.5)
                           p2         = (p + fromIntegral (fst dimensions), q + fromIntegral (snd dimensions))
                       in  pointInBox pos p1 p2
-
                       
   getPressedButton :: [Maybe GameStateManager] -> GameStateManager -> GameStateManager
   getPressedButton events m = let pressed = filter (\x -> isJust x) events

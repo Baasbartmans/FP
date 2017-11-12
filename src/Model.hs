@@ -7,7 +7,7 @@ import Data.List
 import Data.Maybe
 
 nO_SECS_BETWEEN_CYCLES :: Float
-nO_SECS_BETWEEN_CYCLES = 5
+nO_SECS_BETWEEN_CYCLES = 0.01
 
 data GameStateManager = GameStateManager {
   current     :: GameState,

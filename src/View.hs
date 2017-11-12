@@ -18,8 +18,10 @@ instance Drawable GameState where
 
 instance Drawable Scene where
     draw scene = let hudPicture      = drawPictures $ hud scene
-                     entitiesPicture = drawPictures $ entities scene
-                     tilemapPicture  = [drawPictures row | row <- tileMap scene]
+                     (x,y)           = getPosition $ head [obj | obj <- entities scene, name obj == "Player"]
+                     playerOffset    = (x, y)
+                     entitiesPicture = drawPicturesWithOffset (entities scene) playerOffset
+                     tilemapPicture  = [drawPicturesWithOffset row playerOffset | row <- tileMap scene]
                  in  Pictures (hudPicture : entitiesPicture : tilemapPicture)
 
 view :: GameStateManager -> IO Picture
@@ -27,10 +29,20 @@ view manager = return $ draw (current manager)
 
 drawPictures :: [GameObject] -> Picture
 drawPictures objects = let bodies         = map (\x -> body x) objects
-                           noEmpties      = filter (\x -> (not . isEmptyBody) x) bodies
+                           noEmpties      = filter (\x -> not (isEmptyBody x)) bodies
                            tuples         = map (\x -> (collisionBox $ rigidBody x, sprite x)) noEmpties
                            inScreenCoords = toScreen tuples
                        in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- inScreenCoords]
 
+drawPicturesWithOffset :: [GameObject] -> Position -> Picture
+drawPicturesWithOffset objects playerpos = let bodies         = map (\x -> body x) objects
+                                               noEmpties      = filter (\x -> not (isEmptyBody x)) bodies
+                                               tuples         = map (\x -> (collisionBox $ rigidBody x, sprite x)) noEmpties
+                                               inScreenCoords = toScreenWithOffset tuples playerpos
+                                           in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- inScreenCoords]
+
 toScreen :: [(CollisionBox, Picture)] -> [(Position, Picture)]
 toScreen zipped = map (\(CollisionBox (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped
+
+toScreenWithOffset :: [(CollisionBox, Picture)] -> Position -> [(Position, Picture)]
+toScreenWithOffset zipped (px, py) = map (\(CollisionBox (x,y) (w,h), s) -> ((x - px , (-y) + py), s)) zipped
