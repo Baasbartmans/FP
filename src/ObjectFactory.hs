@@ -30,6 +30,10 @@ traverseLines :: Int -> [String] -> IO TileMap
 traverseLines _ []     = return [[]]
 traverseLines i (x:xs) = (:) <$> (traverseLine x (0, i)) <*> (traverseLines (i+1) xs)
 
+-- switch frames for animation
+--animate :: [IO Picture] -> Int -> IO Picture
+--animate a i | i < length a =  
+
 -- traverse a line of a file and turn all IO GameObjects into one IO [GameObject]
 traverseLine :: String -> (Int, Int) -> IO [GameObject]
 traverseLine [] _         = return []
