@@ -67,7 +67,7 @@ module Controller where
         backBtn = buttonEvent mousePos "backBtn" hudlist m{current=getGameState m MainMenu}
         playState = getGameState m Play
         lvl1Btn = buttonEvent mousePos "lvl1Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 0)}}
-        --lvl2Btn = buttonEvent mousePos "lvl2Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 1)}}        
+        lvl2Btn = buttonEvent mousePos "lvl2Btn" hudlist m{current=playState{currentScene=((scenes playState) !! 1)}}        
     in  getPressedButton [backBtn, lvl1Btn] m
   levelSelectInput _ m = m
 
