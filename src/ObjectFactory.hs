@@ -49,15 +49,9 @@ getTile :: Char -> Position -> IO GameObject
 getTile char pos = case char of
                         '.' -> basicTile
                         '#' -> groundTile pos
-                        '@' -> iceTile pos
-                        '+' -> hotTile pos
                         '1' -> startTile pos
                         'X' -> endTile pos
                         'F' -> flameEnemy pos
-                        'T' -> turtleEnemy pos
-                        'L' -> rocketEnemyL pos
-                        'R' -> rocketEnemyR pos
-                        'S' -> sparkyEnemy pos
                         'W' -> waterPickup pos              
 
 -- GameObjects ---------------------------------------------------------------------
@@ -73,16 +67,6 @@ groundTile pos = do loadGameObject "Assets/spr_wall.bmp"
                                    "groundTile #" 
                                    (CollisionBox (fst pos, snd pos) (64,64)) 
 
-iceTile :: Position -> IO GameObject
-iceTile pos = do loadGameObject "Assets/spr_ice.bmp" 
-                                  "iceTile @" 
-                                  (CollisionBox pos (32,32)) 
-
-hotTile :: Position -> IO GameObject
-hotTile pos = do loadGameObject "Assets/spr_hot.bmp" 
-                                  "hotTile +" 
-                                  (CollisionBox pos (32,32)) 
-
 startTile :: Position -> IO GameObject
 startTile pos = do loadGameObject "Assets/spr_idle.bmp" --geen sprite?
                                   "Player" 
@@ -96,26 +80,6 @@ endTile pos = do loadGameObject "Assets/spr_goal.bmp"
 flameEnemy :: Position -> IO GameObject
 flameEnemy pos = do loadGameObject "Assets/spr_flame@9.bmp" 
                                   "flameEnemy F" 
-                                  (CollisionBox pos (32,32)) 
-
-turtleEnemy :: Position -> IO GameObject
-turtleEnemy pos = do loadGameObject "Assets/spr_sneeze@9.bmp" 
-                                  "turtleEnemy T" 
-                                  (CollisionBox pos (32,32)) 
-
-rocketEnemyL :: Position -> IO GameObject
-rocketEnemyL pos = do loadGameObject "Assets/spr_rocket@3.bmp" 
-                                  "rocketEnemy L" 
-                                  (CollisionBox pos (32,32)) 
-                            
-rocketEnemyR :: Position -> IO GameObject
-rocketEnemyR pos = do loadGameObject "Assets/spr_rocket@3.bmp" 
-                                  "rocketEnemy R" 
-                                  (CollisionBox pos (32,32)) 
-
-sparkyEnemy :: Position -> IO GameObject
-sparkyEnemy pos = do loadGameObject "Assets/spr_electrocute@6x5.bmp" 
-                                  "sparkyEnemy S" 
                                   (CollisionBox pos (32,32)) 
 
 waterPickup :: Position -> IO GameObject

@@ -14,7 +14,7 @@ import Screen
 
 main :: IO ()
 main = do gamestates <- loadGameStates
-          let startGameState   = gamestates !! 1
+          let startGameState   = gamestates !! 2
           let gameStateManager = GameStateManager startGameState gamestates 0
           playIO window        -- Or FullScreen
               black            -- Background color
