@@ -21,10 +21,12 @@ loadLevels []     = return []
 loadLevels (x:xs) = (:) <$> loadLevel x <*> loadLevels xs
 
 loadLevel :: FilePath -> IO Scene
-loadLevel path = do tilemap       <- loadTileMap path
-                    let player     = head [obj | obj <- concat tilemap, name obj == "Player"]
-                    let newTilemap = [[replaceWithEmpty "Player" obj | obj <- row] | row <- tilemap]
-                    return $ Scene [] [player] newTilemap
+loadLevel path = do tilemap    <- loadTileMap path
+                    let player  = head [obj | obj <- concat tilemap, name obj == "Player"]
+                    let pickups = [obj | obj <- concat tilemap, name obj == "Pickup"]
+                    let newMap1 = [[replaceWithEmpty "Player" obj | obj <- row] | row <- tilemap]
+                    let newMap2 = [[replaceWithEmpty "Pickup" obj | obj <- row] | row <- newMap1]
+                    return $ Scene [] (player : pickups) newMap2
 
 replaceWithEmpty :: String -> GameObject -> GameObject
 replaceWithEmpty n obj | n == (name obj) = GameObject "Empty" Empty
@@ -71,54 +73,54 @@ basicTile = return $ GameObject "empty" Empty
 groundTile :: Position -> IO GameObject
 groundTile pos = do loadGameObject "Assets/spr_wall.bmp" 
                                    "groundTile #" 
-                                   (CollisionBox pos (72,55)) 
+                                   (CollisionBox True pos (72,55)) 
 
 iceTile :: Position -> IO GameObject
 iceTile pos = do loadGameObject "Assets/spr_ice.bmp" 
                                   "iceTile @" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 hotTile :: Position -> IO GameObject
 hotTile pos = do loadGameObject "Assets/spr_hot.bmp" 
                                   "hotTile +" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 startTile :: Position -> IO GameObject
 startTile pos = do loadGameObject "Assets/spr_idle.bmp" --geen sprite?
                                   "Player" 
-                                  (CollisionBox pos (112,94)) 
+                                  (CollisionBox True pos (112,94)) 
 
 endTile :: Position -> IO GameObject
 endTile pos = do loadGameObject "Assets/spr_goal.bmp" 
                                   "endTile X" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 flameEnemy :: Position -> IO GameObject
 flameEnemy pos = do loadGameObject "Assets/spr_flame@9.bmp" 
                                   "flameEnemy F" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 turtleEnemy :: Position -> IO GameObject
 turtleEnemy pos = do loadGameObject "Assets/spr_sneeze@9.bmp" 
                                   "turtleEnemy T" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 rocketEnemyL :: Position -> IO GameObject
 rocketEnemyL pos = do loadGameObject "Assets/spr_rocket@3.bmp" 
                                   "rocketEnemy L" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
                             
 rocketEnemyR :: Position -> IO GameObject
 rocketEnemyR pos = do loadGameObject "Assets/spr_rocket@3.bmp" 
                                   "rocketEnemy R" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 sparkyEnemy :: Position -> IO GameObject
 sparkyEnemy pos = do loadGameObject "Assets/spr_electrocute@6x5.bmp" 
                                   "sparkyEnemy S" 
-                                  (CollisionBox pos (32,32)) 
+                                  (CollisionBox True pos (32,32)) 
 
 waterPickup :: Position -> IO GameObject
 waterPickup pos = do loadGameObject "Assets/spr_water.bmp" 
-                                  "waterPickup W" 
-                                  (CollisionBox pos (32,32)) 
+                                  "Pickup" 
+                                  (CollisionBox False pos (32,32)) 

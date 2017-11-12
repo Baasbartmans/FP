@@ -46,7 +46,7 @@ drawPicturesWithOffset objects playerpos = let bodies         = map (\x -> body 
                                            in  Pictures [translate (fst pos) (snd pos) sprite | (pos, sprite) <- inScreenCoords]
 
 toScreen :: [(CollisionBox, Picture)] -> [(Position, Picture)]
-toScreen zipped = map (\(CollisionBox (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped
+toScreen zipped = map (\(CollisionBox b (x,y) (w,h), s) -> ((x - fromIntegral(halfWidth), (-y) + fromIntegral(halfHeight)), s)) zipped
 
 toScreenWithOffset :: [(CollisionBox, Picture)] -> Position -> [(Position, Picture)]
-toScreenWithOffset zipped (px, py) = map (\(CollisionBox (x,y) (w,h), s) -> ((x - px , (-y) + py), s)) zipped
+toScreenWithOffset zipped (px, py) = map (\(CollisionBox b (x,y) (w,h), s) -> ((x - px , (-y) + py), s)) zipped

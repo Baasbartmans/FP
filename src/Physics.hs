@@ -7,6 +7,7 @@ type Bounds = (Float, Float)
 type Velocity = (Float, Float)
 
 data CollisionBox = CollisionBox {
+    canCollide    :: Bool,    
     position :: Position,
     size     :: Size
 }
@@ -72,13 +73,20 @@ getYBounds :: CollisionBox -> Bounds
 getYBounds box = let miny = getMinY box
                  in (miny, miny + fromIntegral (snd (size box)))
 
+-- is used for movement and takes the canCollide boolean in consideration
 canMove :: CollisionBox -> CollisionBox -> Bool
-canMove b1 b2 = let xBoundb1 = getXBounds b1
-                    yBoundb1 = getYBounds b1
-                    xBoundb2 = getXBounds b2
-                    yBoundb2 = getYBounds b2
-                in  (not (collide xBoundb1 xBoundb2)) || (not (collide yBoundb1 yBoundb2))
-                        
+canMove b1 b2 | canCollide b1 && canCollide b2 = not (collides b1 b2)
+              | otherwise                      = True
+
+-- checks whether two boundingboxes collide
+collides :: CollisionBox -> CollisionBox -> Bool
+collides b1 b2 = let xBoundb1 = getXBounds b1
+                     yBoundb1 = getYBounds b1
+                     xBoundb2 = getXBounds b2
+                     yBoundb2 = getYBounds b2
+                 in  collide xBoundb1 xBoundb2 && collide yBoundb1 yBoundb2
+
+-- check if collision on an axis is possible
 collide :: Bounds -> Bounds -> Bool
 collide (min1, max1) (min2, max2) = if max1 < min2 then False else
                                     if min1 > max2 then False else
@@ -97,12 +105,6 @@ applyAddedMovement rigidbody = let box     = collisionBox rigidbody
                                    (x,y)   = position box
                                    (vx,vy) = addedMovement rigidbody
                                in  rigidbody{collisionBox=box{position=(x + vx, y + vy)}}
-
-testBody :: RigidBody
-testBody = RigidBody (CollisionBox (0,0) (32,32)) (10,10)
-
-testBody2 :: RigidBody
-testBody2 = RigidBody (CollisionBox (10,10) (32,32)) (10,10)
 
 handleCollision :: (RigidBody, RigidBody) -> [CollisionBox] -> RigidBody
 handleCollision (old, new@RigidBody{collisionBox=box}) boxes | all (\x -> canMove box x || box == x) boxes = new -- rigidbody could move, so we keep it this way
