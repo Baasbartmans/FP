@@ -11,12 +11,17 @@ data CollisionBox = CollisionBox {
     size     :: Size
 }
 
+instance Eq CollisionBox where
+    box1 == box2 = position box1 == position box2 && size box1 == size box2
+    box1 /= box2 = position box1 /= position box2 || size box1 /= size box2
+
 data RigidBody = RigidBody {
     collisionBox  :: CollisionBox,
-    velocity      :: Velocity,
-    addedvelocity :: Velocity,    
-    weight        :: Float
+    addedMovement :: Velocity
 }
+
+instance Show RigidBody where
+    show rigidbody = (show (collisionBox rigidbody)) ++ " | " ++ (show (addedMovement rigidbody))
 
 instance Show CollisionBox where
     show CollisionBox{position=(x,y),size=(a,b)} = "position: " ++ show(x) ++ "," ++ show(y) ++ " size: " ++ show(a) ++ "," ++ show(b)
@@ -56,7 +61,9 @@ setRigidBody obj rb = let tempbody = body obj
 getCollisionBox :: GameObject -> CollisionBox
 getCollisionBox object = collisionBox $ getRigidBody object
 
--- haakjes weghalen vragen op werkcollege!!!
+getPosition :: GameObject -> Position
+getPosition obj = position $ getCollisionBox obj
+
 getXBounds :: CollisionBox -> Bounds
 getXBounds box = let minx = getMinX box
                  in (minx, minx + fromIntegral (fst (size box)))
@@ -70,39 +77,36 @@ canMove b1 b2 = let xBoundb1 = getXBounds b1
                     yBoundb1 = getYBounds b1
                     xBoundb2 = getXBounds b2
                     yBoundb2 = getYBounds b2
-                in  not (collide xBoundb1 xBoundb2) && not (collide yBoundb1 yBoundb2)
+                in  (not (collide xBoundb1 xBoundb2)) || (not (collide yBoundb1 yBoundb2))
                         
 collide :: Bounds -> Bounds -> Bool
 collide (min1, max1) (min2, max2) = if max1 < min2 then False else
-                                    if min1 > max2 then False else  
+                                    if min1 > max2 then False else
                                                         True
 
 -- PHYSICS                    
-gravityConst :: Float
-gravityConst = 9.81
+updateRigidBodies :: [RigidBody] -> [RigidBody] -> Float -> [RigidBody]
+updateRigidBodies bodies tmbodies elapsedTime = let updatedBodies = map (\x -> applyAddedMovement x) bodies            -- bodies to which addedMovement is added 
+                                                    oldAndnew     = zip bodies updatedBodies                           -- tuples containing an old and updated body
+                                                    boxes         = map (\x -> collisionBox x) (updatedBodies ++ tmbodies)
+                                                    filtered      = [handleCollision combi boxes | combi <- oldAndnew] -- check if there's collision, just take the old body else take the updated one
+                                                in  map (\x -> resetAddedMovement x) filtered                          -- reset the addedvelocity of each rigidbody
+                                       
+applyAddedMovement :: RigidBody -> RigidBody
+applyAddedMovement rigidbody = let box     = collisionBox rigidbody
+                                   (x,y)   = position box
+                                   (vx,vy) = addedMovement rigidbody
+                               in  rigidbody{collisionBox=box{position=(x + vx, y + vy)}}
 
-updateRigidBodies :: [RigidBody] -> Float -> [RigidBody]
-updateRigidBodies bodies elapsedTime = let updated  = [applyPhysics body elapsedTime | body <- bodies]    -- apply physics and addedMovement
-                                           oldAnew  = zip bodies updated                                  -- a tuple containing an old and updated body
-                                           newboxes = [collisionBox body | body <- updated]               -- the collisionboxes of the updated bodies
-                                           filtered = [handleCollision combi newboxes | combi <- oldAnew] -- check if there's collision, just take the old body else take the updated one
-                                       in  [resetAddedVelocity body | body <- filtered]                   -- reset the addedvelocity of each rigidbody
+testBody :: RigidBody
+testBody = RigidBody (CollisionBox (0,0) (32,32)) (10,10)
 
-applyPhysics :: RigidBody -> Float -> RigidBody
-applyPhysics body@RigidBody {collisionBox=box, 
-                             velocity=(vx, vy), 
-                             addedvelocity=(vax, vay), 
-                             weight=w} elapsedTime = let gravity     = vy + elapsedTime * w * gravityConst
-                                                         newvelocity = (vx + vax * elapsedTime, vy + vay * elapsedTime + gravity)
-                                                         newbox      = addVelocity box newvelocity elapsedTime
-                                                     in  body {collisionBox=newbox}
+testBody2 :: RigidBody
+testBody2 = RigidBody (CollisionBox (10,10) (32,32)) (10,10)
 
 handleCollision :: (RigidBody, RigidBody) -> [CollisionBox] -> RigidBody
-handleCollision (old, new) boxes | all (\x -> canMove (collisionBox new) x) boxes = new -- rigidbody could move, so we keep it this way
-                                 | otherwise                                      = old -- rigidbody could not move, so we take the old body
+handleCollision (old, new@RigidBody{collisionBox=box}) boxes | all (\x -> canMove box x || box == x) boxes = new -- rigidbody could move, so we keep it this way
+                                                             | otherwise                                   = old -- rigidbody could not move, so we take the old body
 
-resetAddedVelocity :: RigidBody -> RigidBody
-resetAddedVelocity body = RigidBody (collisionBox body) (velocity body) (0, 0) (weight body)
-
-addVelocity :: CollisionBox -> Velocity -> Float -> CollisionBox
-addVelocity box@CollisionBox {position=(x, y)} (vx, vy) elapsedTime = box {position=(x + vx * elapsedTime, y + vy * elapsedTime)}
+resetAddedMovement :: RigidBody -> RigidBody
+resetAddedMovement body = RigidBody (collisionBox body) (0, 0)

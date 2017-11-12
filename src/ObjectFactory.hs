@@ -8,6 +8,8 @@ import Screen
 import Physics
 import Graphics.Gloss.Data.Picture
 import Graphics.Gloss.Data.Bitmap
+import Data.List
+import Data.Maybe
 
 -- LOAD BITMAPS --------------------------------------------------------------------
 loadBitMap :: FilePath -> IO Picture
@@ -19,7 +21,15 @@ loadLevels []     = return []
 loadLevels (x:xs) = (:) <$> loadLevel x <*> loadLevels xs
 
 loadLevel :: FilePath -> IO Scene
-loadLevel path = (\x -> Scene [] [] x) <$> loadTileMap path
+loadLevel path = do tilemap       <- loadTileMap path
+                    let player     = head [obj | obj <- concat tilemap, name obj == "Player"]
+                    let newTilemap = [[replaceWithEmpty "Player" obj | obj <- row] | row <- tilemap]
+                    return $ Scene [] [player] newTilemap
+
+replaceWithEmpty :: String -> GameObject -> GameObject
+replaceWithEmpty n obj | n == (name obj) = GameObject "Empty" Empty
+                       | otherwise       = obj
+
 -- LOAD TILEMAPS -------------------------------------------------------------------
 -- read text from a file and transform it into a TileMap
 loadTileMap :: FilePath -> IO TileMap
@@ -30,10 +40,6 @@ traverseLines :: Int -> [String] -> IO TileMap
 traverseLines _ []     = return [[]]
 traverseLines i (x:xs) = (:) <$> (traverseLine x (0, i)) <*> (traverseLines (i+1) xs)
 
--- switch frames for animation
---animate :: [IO Picture] -> Int -> IO Picture
---animate a i | i < length a =  
-
 -- traverse a line of a file and turn all IO GameObjects into one IO [GameObject]
 traverseLine :: String -> (Int, Int) -> IO [GameObject]
 traverseLine [] _         = return []
@@ -41,7 +47,7 @@ traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral (x * tileWidth), fro
 
 getTile :: Char -> Position -> IO GameObject
 getTile char pos = case char of
-                        '.' -> basicTile pos
+                        '.' -> basicTile
                         '#' -> groundTile pos
                         '@' -> iceTile pos
                         '+' -> hotTile pos
@@ -55,75 +61,64 @@ getTile char pos = case char of
                         'W' -> waterPickup pos              
 
 -- GameObjects ---------------------------------------------------------------------
-loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
-loadGameObject path name box weight = let rigidbody = RigidBody box (0,0) (0,0) weight
+loadGameObject :: FilePath -> String -> CollisionBox -> IO GameObject
+loadGameObject path name box = let rigidbody = RigidBody box (0,0)
                                       in  (\x -> GameObject name (Body rigidbody x)) <$> loadBMP path
 
-basicTile :: Position -> IO GameObject
-basicTile pos = return $ GameObject "empty" Empty
+basicTile :: IO GameObject
+basicTile = return $ GameObject "empty" Empty
 
 groundTile :: Position -> IO GameObject
 groundTile pos = do loadGameObject "Assets/spr_wall.bmp" 
-                                  "groundTile #" 
-                                  (CollisionBox pos (32,32)) 
-                                  0
+                                   "groundTile #" 
+                                   (CollisionBox pos (72,55)) 
 
 iceTile :: Position -> IO GameObject
 iceTile pos = do loadGameObject "Assets/spr_ice.bmp" 
                                   "iceTile @" 
                                   (CollisionBox pos (32,32)) 
-                                  0
 
 hotTile :: Position -> IO GameObject
 hotTile pos = do loadGameObject "Assets/spr_hot.bmp" 
                                   "hotTile +" 
                                   (CollisionBox pos (32,32)) 
-                                  0
 
 startTile :: Position -> IO GameObject
 startTile pos = do loadGameObject "Assets/spr_idle.bmp" --geen sprite?
-                                  "startTile 1" 
-                                  (CollisionBox pos (32,32)) 
-                                  0     
+                                  "Player" 
+                                  (CollisionBox pos (112,94)) 
 
 endTile :: Position -> IO GameObject
 endTile pos = do loadGameObject "Assets/spr_goal.bmp" 
                                   "endTile X" 
                                   (CollisionBox pos (32,32)) 
-                                  0
 
 flameEnemy :: Position -> IO GameObject
 flameEnemy pos = do loadGameObject "Assets/spr_flame@9.bmp" 
                                   "flameEnemy F" 
                                   (CollisionBox pos (32,32)) 
-                                  0 
 
 turtleEnemy :: Position -> IO GameObject
 turtleEnemy pos = do loadGameObject "Assets/spr_sneeze@9.bmp" 
                                   "turtleEnemy T" 
                                   (CollisionBox pos (32,32)) 
-                                  0 
 
 rocketEnemyL :: Position -> IO GameObject
 rocketEnemyL pos = do loadGameObject "Assets/spr_rocket@3.bmp" 
                                   "rocketEnemy L" 
                                   (CollisionBox pos (32,32)) 
-                                  0
                             
 rocketEnemyR :: Position -> IO GameObject
 rocketEnemyR pos = do loadGameObject "Assets/spr_rocket@3.bmp" 
                                   "rocketEnemy R" 
                                   (CollisionBox pos (32,32)) 
-                                  0 
 
 sparkyEnemy :: Position -> IO GameObject
 sparkyEnemy pos = do loadGameObject "Assets/spr_electrocute@6x5.bmp" 
                                   "sparkyEnemy S" 
                                   (CollisionBox pos (32,32)) 
-                                  0
 
 waterPickup :: Position -> IO GameObject
 waterPickup pos = do loadGameObject "Assets/spr_water.bmp" 
                                   "waterPickup W" 
                                   (CollisionBox pos (32,32)) 
-                                  0     
