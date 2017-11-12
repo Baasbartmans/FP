@@ -35,7 +35,6 @@ traverseLine [] _         = return []
 traverseLine (z:zs) (x,y) = (:) <$> getTile z (fromIntegral (x * tileWidth), fromIntegral (y * tileHeight)) <*> traverseLine zs (x+1,y)
 
 getTile :: Char -> Position -> IO GameObject
-<<<<<<< HEAD
 getTile char pos = case char of
                         '*' -> basicTile pos
                         '#' -> groundTile pos
@@ -43,15 +42,13 @@ getTile char pos = case char of
                         '+' -> hotTile pos
                         '1' -> startTile pos
                         'X' -> endTile pos
-                        'F' -> fameEnemy pos
+                        'F' -> flameEnemy pos
                         'T' -> turtleEnemy pos
                         'L' -> rocketEnemyL pos
                         'R' -> rocketEnemyR pos
                         'S' -> sparkyEnemy pos
                         'W' -> waterPickup pos              
-=======
-getTile char pos = groundTile pos
->>>>>>> 696a8cbb985c2ef56f5c488bfb2d15a91a2a7357
+--getTile char pos = groundTile pos
 
 -- GameObjects ---------------------------------------------------------------------
 loadGameObject :: FilePath -> String -> CollisionBox -> Float -> IO GameObject
