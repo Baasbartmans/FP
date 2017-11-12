@@ -15,7 +15,7 @@ data GameStateManager = GameStateManager {
   elapsedTime :: Float  
 }
 
-data GSType = MainMenu | SelectLevel | Play deriving (Eq)
+data GSType = MainMenu | SelectLevel | Play | Victory deriving (Eq)
 data GameState = GameState {
   currentScene :: Scene,
   scenes       :: [Scene],               
